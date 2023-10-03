@@ -7,10 +7,10 @@ resource "aws_lb" "my_lb" {
   internal           = false
   load_balancer_type = "application"
   subnets            = [aws_subnet.subnet03.id, aws_subnet.subnet04.id] # Specify the subnet IDs for the ALB
-  enable_deletion_protection = false # Set to true if you want to enable deletion protection
-  enable_http2       = true # Optional: Enable HTTP/2
-  idle_timeout       = 60   # Optional: Adjust the idle timeout as needed
-  enable_cross_zone_load_balancing = true # Optional: Enable cross-zone load balancing
+#  enable_deletion_protection = false # Set to true if you want to enable deletion protection
+#  enable_http2       = true # Optional: Enable HTTP/2
+#  idle_timeout       = 60   # Optional: Adjust the idle timeout as needed
+#  enable_cross_zone_load_balancing = true # Optional: Enable cross-zone load balancing
 }
 
 # Create a target group
@@ -19,25 +19,34 @@ resource "aws_lb_target_group" "my_target_group" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc.id # Specify your VPC ID
-  target_type = "ip" 
+  target_type = "ip"
+
+   health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 30
+    path                = "/"
+    matcher             = "200"
+  }
 }
 
 # Create a listener for the ALB
-resource "aws_lb_listener" "my_listener" {
-  load_balancer_arn = aws_lb.my_lb.arn
-  port              = 80
-  protocol          = "HTTP"
+#resource "aws_lb_listener" "my_listener" {
+ # load_balancer_arn = aws_lb.my_lb.arn
+ # port              = 80
+ # protocol          = "HTTP"
 
-  default_action {
-    target_group_arn = aws_lb_target_group.my_target_group.arn
-    type             = "fixed-response"
-    fixed_response {
-      content_type    = "text/plain"
-      status_code     = "200"
-      message_body    = "OK"
-    }
-  }
-}
+  #default_action {
+   # target_group_arn = aws_lb_target_group.my_target_group.arn
+   # type             = "fixed-response"
+   # fixed_response {
+    #  content_type    = "text/plain"
+     # status_code     = "200"
+    #  message_body    = "OK"
+   # }
+#  }
+#}
 
 #associating target group with ALB
 #resource "aws_lb_target_group_attachment" "my_attachment" {
@@ -103,10 +112,10 @@ resource "aws_ecs_service" "example_service" {
   }
 }
  # Extract the task definition ARN for the Fargate task
-data "aws_ecs_task_definition" "example_task" {
-  task_definition = aws_ecs_task_definition.example_task.family # Use a unique identifier here
+#data "aws_ecs_task_definition" "example_task" {
+ # task_definition = aws_ecs_task_definition.example_task.family # Use a unique identifier here
 
-}
+#}
 
 # Associating the target group with the ALB
 resource "aws_lb_target_group_attachment" "my_attachment" {
